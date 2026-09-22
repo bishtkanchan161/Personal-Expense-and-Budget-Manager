@@ -1,10 +1,12 @@
 from expense import Expense
 
 import pandas as pd
+from datetime import datetime
 class Budget:
     def __init__(self, income=0, budget=0):
         self.income=income
         self.budget=budget
+        self.remaining_budget=budget
         self.expenses=[]
     def set_income(self):
         income= float(input("enter your income:"))
@@ -21,12 +23,36 @@ class Budget:
         budget=float(input("enter your budget: "))
         
         self.budget=budget
+        self.remaining_budget=budget
         print("Your total budget is:",self.budget)
 
+    
+    def get_total_expenses(self):
+        df = self.create_dataframe()
+        total_expenses = df["Amount"].sum()
+        return total_expenses
+    
     def update_budget(self):
-        new_budget= float(input("enter your  new monthly budget:"))
-        self.new_budget=new_budget
-        print("Your new total budget is:",self.new_budget)
+        print("A. Add amount in remaining budget")
+        print("B. Increase total budget")
+        choice= input("Enter your choice:")
+        if choice == "A":
+            add_amount=float(input("Enter amount to add in remaining budget:"))
+            self.remaining_budget= self.remaining_budget+add_amount
+            print("Amount added:",add_amount)
+            print("Your updated remaining budget is:", self.remaining_budget)
+
+        elif choice=="B":
+            add_amount=float(input("Enter amount to increase in budget:"))
+            self.budget=self.budget+add_amount
+            self.remaining_budget=self.remaining_budget+add_amount
+            print("Amount added:",add_amount)
+            print("Your updated total budget is:", self.budget)
+            print("Your updated remaining budget is:", self.remaining_budget)
+        else:
+            print("Invalid Choice.")
+            
+                
     def create_dataframe(self):
         data=[]
         for exp in self.expenses:
@@ -38,6 +64,17 @@ class Budget:
             })
         df=pd.DataFrame(data)
         return df
+    def validate_date(self):
+
+        while True:
+            date = input("Enter the Date (DD/MM/YYYY): ")
+
+            try:
+                datetime.strptime(date, "%d/%m/%Y")
+                return date
+
+            except ValueError:
+                print("Invalid date. Please enter date in DD/MM/YYYY format.")
     
          
        
@@ -67,7 +104,10 @@ class Budget:
             elif user_input=="4":
                 self.update_budget()
             elif user_input=="5":
-                date = input("Enter the Date: ")
+                if self.income<=0 or self.budget<=0:
+                    print("Please set your income and budget first.")
+                    continue
+                date = self.validate_date()
                 amount = float(input("Enter the Amount: "))
                 category = input("Enter the Category: ")
                 description = input("Enter the Description: ")
@@ -75,6 +115,7 @@ class Budget:
                 exp = Expense(date, amount, category, description)
                 
                 self.expenses.append(exp)
+                self.remaining_budget=self.remaining_budget-amount
                 
                 exp.display_expenses()
             elif user_input=="6":
@@ -83,7 +124,7 @@ class Budget:
             
             elif user_input=="7":
                 df=self.create_dataframe()
-                total_expenses=df["Amount"].sum()
+                total_expenses=self.get_total_expenses()
                 print("Total Expenses is:",total_expenses)
 
                 average_expenses=df["Amount"].mean()
@@ -97,15 +138,15 @@ class Budget:
 
 
             elif user_input=="8":
-                df=self.create_dataframe()
-                rem_budget=self.budget-total_expenses
-                print("Remainig Budget is:",rem_budget)
-
+                print("Remaining Budget is:", self.remaining_budget)
                
-            
+            elif user_input=="9":
+                print("program exited")
+                break
            
             else:
-                break
+                print("Invalid choice.")
+               
 
 obj=Budget()
 obj.menu()
