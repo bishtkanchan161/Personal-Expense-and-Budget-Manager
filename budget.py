@@ -176,6 +176,56 @@ class Budget:
 
                 print("Please enter a valid number.")
 
+    def edit_expense(self):
+        if not self.expenses:
+            print("No expenses available.")
+            return
+
+        print(self.create_dataframe())
+
+        expense_id = int(input("Enter Expense ID to edit: "))
+
+        for exp in self.expenses:
+            if exp.expense_id == expense_id:
+
+                print("1. Date")
+                print("2. Amount")
+                print("3. Category")
+                print("4. Description")
+
+                choice = input("Enter your choice: ")
+
+                if choice == "1":
+                    exp.update_expense(date=self.validate_date())
+
+                elif choice == "2":
+                    new_amount = self.validate_amount()
+                    difference = new_amount - exp.amount
+
+                    if difference > self.remaining_budget:
+                        print("Not enough remaining budget.")
+                        return
+
+                    self.remaining_budget -= difference
+                    exp.update_expense(amount=new_amount)
+
+                elif choice == "3":
+                    exp.update_expense(category=self.validate_text("Enter new Category: "))
+
+                elif choice == "4":
+                    exp.update_expense(description=self.validate_text("Enter new Description: "))
+                
+
+                else:
+                    print("Invalid choice!")
+                    return
+
+                print("Expense updated successfully!")
+                print(self.create_dataframe())
+                return
+
+        print("Expense ID not found.")
+
     def validate_text(self, message):
 
         while True:
@@ -201,9 +251,10 @@ class Budget:
         6. Press 6 for show all expenses Details
         7. Press 7 for show expenses analysis
         8. Press 8 for show remainig budget
+        9. Press 9 for edit expense
         
        
-        9. Press 9 for exist
+        10. Press 10 for exist
         ''' )
             print("Your choice is:", user_input)
 
@@ -318,8 +369,11 @@ class Budget:
 
             elif user_input=="8":
                 print("Remaining Budget is:", self.remaining_budget)
-               
+
             elif user_input=="9":
+                self.edit_expense()
+               
+            elif user_input=="10":
                 print("program exited")
                 break
            
